@@ -84,12 +84,29 @@ app.post('/api/rate', (req, res) => {
   res.json({ success: true });
 });
 
+// Only count sessions that rated all photos
+function getCompleteSessions(ratings) {
+  const totalPhotos = getValidPhotos().length;
+  const sessionPhotos = {};
+  ratings.forEach(r => {
+    if (!sessionPhotos[r.sessionId]) sessionPhotos[r.sessionId] = new Set();
+    sessionPhotos[r.sessionId].add(r.photoId);
+  });
+  const complete = new Set();
+  for (const [sid, photos] of Object.entries(sessionPhotos)) {
+    if (photos.size >= totalPhotos) complete.add(sid);
+  }
+  return complete;
+}
+
 // Get aggregated results
 app.get('/api/results', (req, res) => {
   const data = loadData();
+  const complete = getCompleteSessions(data.ratings);
   const buckets = {};
 
   data.ratings.forEach(r => {
+    if (!complete.has(r.sessionId)) return;
     if (!buckets[r.photoId]) {
       buckets[r.photoId] = { M: { total: 0, count: 0 }, F: { total: 0, count: 0 } };
     }
@@ -107,12 +124,14 @@ app.get('/api/results', (req, res) => {
   res.json(results);
 });
 
-// Get participation stats
+// Get participation stats (only complete sessions)
 app.get('/api/stats', (req, res) => {
   const data = loadData();
+  const complete = getCompleteSessions(data.ratings);
   const sessions = { M: new Set(), F: new Set() };
 
   data.ratings.forEach(r => {
+    if (!complete.has(r.sessionId)) return;
     if (sessions[r.gender]) sessions[r.gender].add(r.sessionId);
   });
 
