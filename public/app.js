@@ -5,7 +5,7 @@ const state = {
   sessionId: localStorage.getItem('fr_session') || generateId(),
   photos: [],
   currentIndex: 0,
-  myRatings: {}
+  myRatings: JSON.parse(localStorage.getItem('fr_ratings') || '{}')
 };
 
 if (!localStorage.getItem('fr_session')) {
@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rate-again-btn').addEventListener('click', () => {
     state.sessionId = generateId();
     localStorage.setItem('fr_session', state.sessionId);
+    localStorage.removeItem('fr_completed');
+    localStorage.removeItem('fr_ratings');
+    localStorage.removeItem('fr_gender');
     state.myRatings = {};
     state.currentIndex = 0;
     switchView('welcome');
@@ -82,7 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
     (i <= 5 ? row1 : row2).appendChild(btn);
   }
 
-  loadStats();
+  // Check if user already completed — go straight to results
+  if (localStorage.getItem('fr_completed')) {
+    state.gender = localStorage.getItem('fr_gender');
+    showResults();
+  } else {
+    loadStats();
+  }
 });
 
 // ===== Welcome =====
@@ -154,6 +163,9 @@ async function submitRating(score) {
   const btns = document.querySelectorAll('.score-btn');
   btns[score - 1].classList.add('selected');
 
+  // Save to localStorage
+  localStorage.setItem('fr_ratings', JSON.stringify(state.myRatings));
+
   // Send to server (non-blocking)
   api('/rate', {
     method: 'POST',
@@ -172,6 +184,8 @@ async function submitRating(score) {
 
     state.currentIndex++;
     if (state.currentIndex >= state.photos.length) {
+      localStorage.setItem('fr_completed', '1');
+      localStorage.setItem('fr_gender', state.gender);
       showResults();
     } else {
       showPhoto(state.currentIndex);
