@@ -8,6 +8,8 @@
 | **類型** | 趣味性社群調查網站 |
 | **核心概念** | 用 20 張 AI 生成的台灣男性照片，讓使用者依性別評分，揭露男女之間的審美觀差異 |
 | **目標受眾** | 對審美差異好奇的一般使用者（娛樂性質，非學術研究） |
+| **線上網址** | https://face-rating.onrender.com |
+| **GitHub Repo** | https://github.com/lisachiu/face-rating |
 
 ## 二、核心動機
 
@@ -22,6 +24,8 @@
 | **資料庫** | JSON 檔案（`data.json`） |
 | **字型** | Google Fonts — Noto Sans TC |
 | **照片來源** | DALL-E 生成的 20 張台灣男性大頭照（PNG） |
+| **部署平台** | Render（免費方案） |
+| **防休眠** | UptimeRobot 每 5 分鐘 ping `/api/stats` |
 
 ## 四、頁面流程
 
@@ -127,6 +131,7 @@ face-rating/
 ├── pick.js                # 互動式照片挑選工具
 ├── CODEX_PROMPT.txt       # Codex 生成照片用的 prompt
 ├── SPEC.md                # 本規格書
+├── .gitignore             # Git 忽略規則
 ├── public/
 │   ├── index.html         # 單頁應用 HTML
 │   ├── style.css          # 響應式樣式
@@ -143,7 +148,31 @@ face-rating/
 
 ## 十一、啟動方式
 
+### 本機開發
 ```bash
 npm install
 npm start        # http://localhost:3000
 ```
+
+### 部署
+- 程式碼推到 GitHub 後，Render 自動從 `main` 分支部署
+- Build Command：`npm install`
+- Start Command：`npm start`
+- Region：Singapore
+
+## 十二、部署架構
+
+```
+使用者瀏覽器
+    ↓ HTTPS
+https://face-rating.onrender.com  （Render 免費方案）
+    ↓ 執行
+Node.js + Express
+    ↓ 讀寫
+data.json（Render 暫存檔案系統）
+```
+
+### 注意事項
+- Render 免費版檔案系統是暫存的，重新部署會清空 `data.json`
+- UptimeRobot 每 5 分鐘 ping 網站防止休眠（免費版閒置 15 分鐘會休眠）
+- 如需資料永久保存，未來可接 Supabase 等免費雲端資料庫
