@@ -71,14 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === '0') submitRating(10);
   });
 
-  // Generate score buttons
-  const container = document.getElementById('score-buttons');
+  // Generate score buttons (two rows: 1-5, 6-10)
+  const row1 = document.getElementById('score-buttons-1');
+  const row2 = document.getElementById('score-buttons-2');
   for (let i = 1; i <= 10; i++) {
     const btn = document.createElement('button');
     btn.className = 'score-btn';
     btn.textContent = i;
     btn.addEventListener('click', () => submitRating(i));
-    container.appendChild(btn);
+    (i <= 5 ? row1 : row2).appendChild(btn);
   }
 
   loadStats();
@@ -166,6 +167,9 @@ async function submitRating(score) {
 
   // Next photo
   setTimeout(() => {
+    // Clear all selected states immediately before switching
+    document.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+
     state.currentIndex++;
     if (state.currentIndex >= state.photos.length) {
       showResults();
