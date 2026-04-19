@@ -53,6 +53,23 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStats();
   });
 
+  // Share button
+  document.getElementById('share-btn').addEventListener('click', async () => {
+    const shareData = {
+      title: '顏值審美大調查',
+      text: '來看看男女對「帥」的定義差多少！',
+      url: window.location.origin
+    };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(shareData.url);
+      const toast = document.getElementById('share-toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+  });
+
   // Keyboard shortcuts during rating
   document.addEventListener('keydown', e => {
     if (state.view !== 'rating') return;
@@ -110,6 +127,12 @@ async function startRating(gender) {
   if (state.photos.length === 0) {
     alert('目前沒有照片！請先執行 npm run setup 生成佔位圖片，或在 public/photos/ 中放入照片。');
     return;
+  }
+
+  // Shuffle photos for random order
+  for (let i = state.photos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [state.photos[i], state.photos[j]] = [state.photos[j], state.photos[i]];
   }
 
   switchView('rating');
@@ -183,9 +206,11 @@ async function submitRating(score) {
 
 // ===== Results =====
 async function showResults() {
-  if (state.photos.length === 0) {
-    try { state.photos = await api('/photos'); } catch { /* ignore */ }
-  }
+  // For results page, always use sorted photo list
+  try {
+    const allPhotos = await api('/photos');
+    if (allPhotos.length > 0) state.photos = allPhotos;
+  } catch { /* ignore */ }
 
   let results, stats;
   try {
