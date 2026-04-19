@@ -47,19 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // View results without rating
   document.getElementById('view-results-btn').addEventListener('click', showResults);
 
-  // Rate again
-  document.getElementById('rate-again-btn').addEventListener('click', () => {
-    state.sessionId = generateId();
-    localStorage.setItem('fr_session', state.sessionId);
-    localStorage.removeItem('fr_completed');
-    localStorage.removeItem('fr_ratings');
-    localStorage.removeItem('fr_gender');
-    state.myRatings = {};
-    state.currentIndex = 0;
-    switchView('welcome');
-    loadStats();
-  });
-
   // Back home
   document.getElementById('back-home-btn').addEventListener('click', () => {
     switchView('welcome');
