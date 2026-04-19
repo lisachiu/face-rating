@@ -197,6 +197,10 @@ async function showResults() {
 
   switchView('results');
   renderResults(results, stats);
+
+  // Hide back-home button for completed users
+  document.getElementById('back-home-btn').style.display =
+    localStorage.getItem('fr_completed') ? 'none' : '';
 }
 
 function renderResults(results, stats) {
