@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>顏值審美大調查</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Welcome View -->
+    <div id="welcome-view" class="view active">
+      <div class="container welcome-container">
+        <h1 class="title">顏值審美<span class="highlight">大調查</span></h1>
+        <p class="subtitle">
+          男生覺得帥的，女生也覺得帥嗎？<br>
+          為 20 張 AI 生成的男性照片評分<br>
+          看看男女的審美觀差多少！
+        </p>
+        <div class="gender-select">
+          <button class="gender-btn male" data-gender="M">
+            <span class="gender-icon">👨</span>
+            <span class="gender-label">我是男生</span>
+          </button>
+          <button class="gender-btn female" data-gender="F">
+            <span class="gender-icon">👩</span>
+            <span class="gender-label">我是女生</span>
+          </button>
+        </div>
+        <p class="stats-preview" id="stats-preview"></p>
+        <button class="link-btn" id="view-results-btn">📊 直接查看目前結果</button>
+      </div>
+    </div>
+
+    <!-- Rating View -->
+    <div id="rating-view" class="view">
+      <div class="container rating-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">1 / 20</div>
+        <div class="photo-card">
+          <img id="current-photo" src="" alt="照片" draggable="false">
+        </div>
+        <div class="score-section">
+          <p class="score-label">這張照片的顏值幾分？</p>
+          <div class="score-buttons" id="score-buttons"></div>
+          <p class="score-hint">鍵盤快捷鍵：1-9 評分，0 = 10 分</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results View -->
+    <div id="results-view" class="view">
+      <div class="container">
+        <h2 class="results-title">📊 審美差異大公開</h2>
+        <div id="results-summary"></div>
+        <div id="results-grid"></div>
+        <div class="results-actions">
+          <button class="btn primary" id="rate-again-btn">🔄 重新評分</button>
+          <button class="btn secondary" id="back-home-btn">🏠 回首頁</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
