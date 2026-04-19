@@ -86,7 +86,6 @@ app.post('/api/rate', (req, res) => {
 
 // Only count sessions that rated all photos
 function getCompleteSessions(ratings) {
-  const totalPhotos = getValidPhotos().length;
   const sessionPhotos = {};
   ratings.forEach(r => {
     if (!sessionPhotos[r.sessionId]) sessionPhotos[r.sessionId] = new Set();
@@ -94,7 +93,7 @@ function getCompleteSessions(ratings) {
   });
   const complete = new Set();
   for (const [sid, photos] of Object.entries(sessionPhotos)) {
-    if (photos.size >= totalPhotos) complete.add(sid);
+    if (photos.size >= 15) complete.add(sid);
   }
   return complete;
 }
