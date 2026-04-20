@@ -78,6 +78,7 @@
 | `POST` | `/api/rate` | 提交評分 |
 | `GET` | `/api/results` | 取得所有照片的男女平均分 |
 | `GET` | `/api/stats` | 取得參與人數統計 |
+| `GET` | `/api/export` | 下載完整 data.json（資料備份用） |
 
 ### POST `/api/rate` Request Body
 ```json
@@ -195,3 +196,14 @@ data.json（Render 暫存檔案系統）
 - UptimeRobot 每 5 分鐘 ping 網站防止休眠（免費版閒置 15 分鐘會休眠）
 - 結果計算僅包含完成 15 張以上的 session，未完成者的評分不影響平均分數
 - 如需資料永久保存，未來可接 Supabase 等免費雲端資料庫
+
+### 資料備份流程（每次 git push 前執行）
+```powershell
+# 1. 先把線上資料拉下來
+Invoke-WebRequest -Uri https://face-rating.onrender.com/api/export -OutFile C:\Users\Ching\face-rating\data.json
+# 2. 再 commit + push
+git add -A
+git commit -m "your message"
+git push origin main
+```
+或直接在瀏覽器開啟 https://face-rating.onrender.com/api/export 下載備份
