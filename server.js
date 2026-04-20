@@ -140,6 +140,13 @@ app.get('/api/stats', (req, res) => {
   res.json(stats);
 });
 
+// Export full data.json for backup
+app.get('/api/export', (req, res) => {
+  const data = loadData();
+  res.setHeader('Content-Disposition', 'attachment; filename="data.json"');
+  res.json(data);
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 顏值審美大調查 running at http://localhost:${PORT}`);
