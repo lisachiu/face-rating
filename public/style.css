@@ -151,7 +151,6 @@ body {
   flex-direction: column;
   align-items: center;
   padding-top: 24px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .progress-bar {
@@ -181,7 +180,7 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   max-width: 340px;
   width: 100%;
 }
@@ -556,53 +555,57 @@ body {
     display: none;
   }
 
-  /* Compact rating layout on mobile */
+  /* Adaptive rating layout on mobile */
   .rating-container {
     padding-top: 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0));
+    justify-content: center;
   }
   .progress-text {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .photo-card {
-    margin-bottom: 14px;
-    max-width: 260px;
+    margin-bottom: 12px;
+    /* Scale photo to viewport height: ~42% of dvh, clamped between 180px and 300px */
+    max-width: clamp(180px, 42dvh, 300px);
   }
   .score-label {
     font-size: 0.95rem;
-    margin-bottom: 10px;
-  }
-}
-
-/* Extra compact for small viewport heights (webviews, browser toolbars) */
-@media (max-width: 520px) and (max-height: 700px) {
-  .rating-container {
-    padding-top: 8px;
-  }
-  .progress-text {
-    margin-bottom: 6px;
-  }
-  .photo-card {
-    margin-bottom: 10px;
-    max-width: 200px;
-  }
-  .score-label {
-    font-size: 0.88rem;
-    margin-bottom: 6px;
-  }
-  .score-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 0.9rem;
+    margin-bottom: 8px;
   }
   .score-row {
     margin-bottom: 6px;
   }
-  .row-anchor {
-    font-size: 0.65rem;
-    width: 26px;
+}
+
+/* Extra compact for very small viewport heights (webviews with toolbars) */
+@media (max-width: 520px) and (max-height: 660px) {
+  .rating-container {
+    padding-top: 6px;
+  }
+  .progress-text {
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+  }
+  .photo-card {
+    margin-bottom: 8px;
+    max-width: clamp(140px, 36dvh, 220px);
+  }
+  .score-label {
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+  }
+  .score-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 0.92rem;
   }
   .score-buttons {
     gap: 4px;
+  }
+  .row-anchor {
+    font-size: 0.65rem;
+    width: 26px;
   }
 }
 

@@ -161,7 +161,12 @@ face-rating/
 ## 十、響應式設計
 
 - 桌面與手機皆可使用
-- 斷點 520px 以下：卡片改為直式排列、評分按鈕縮小、隱藏鍵盤提示與人數細節
+- 斷點 520px 以下：卡片改為直式排列、評分按鈕 48px、隱藏鍵盤提示與人數細節
+- 評分頁照片尺寸使用 `clamp() + dvh` 自適應視窗高度，避免固定尺寸在不同手機上過大或過小
+  - 一般手機：`clamp(180px, 42dvh, 300px)`
+  - 小視窗 (≤660px 高，如 WebView)：`clamp(140px, 36dvh, 220px)`，按鈕縮至 42px
+- 評分頁容器使用 `justify-content: center` 垂直置中，避免上方擠、下方留白
+- 底部安全區域使用 `env(safe-area-inset-bottom)` 適配 iPhone Home Indicator
 - 使用 `@media (hover: hover)` 防止手機觸控後 hover 狀態殘留
 - 結果頁照片高度在手機上設為 `auto`，避免裁切
 
