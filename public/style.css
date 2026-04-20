@@ -151,6 +151,7 @@ body {
   flex-direction: column;
   align-items: center;
   padding-top: 24px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .progress-bar {
@@ -553,6 +554,55 @@ body {
   }
   .score-hint {
     display: none;
+  }
+
+  /* Compact rating layout on mobile */
+  .rating-container {
+    padding-top: 12px;
+  }
+  .progress-text {
+    margin-bottom: 10px;
+  }
+  .photo-card {
+    margin-bottom: 14px;
+    max-width: 260px;
+  }
+  .score-label {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+}
+
+/* Extra compact for small viewport heights (webviews, browser toolbars) */
+@media (max-width: 520px) and (max-height: 700px) {
+  .rating-container {
+    padding-top: 8px;
+  }
+  .progress-text {
+    margin-bottom: 6px;
+  }
+  .photo-card {
+    margin-bottom: 10px;
+    max-width: 200px;
+  }
+  .score-label {
+    font-size: 0.88rem;
+    margin-bottom: 6px;
+  }
+  .score-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  .score-row {
+    margin-bottom: 6px;
+  }
+  .row-anchor {
+    font-size: 0.65rem;
+    width: 26px;
+  }
+  .score-buttons {
+    gap: 4px;
   }
 }
 
