@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>審美差異分析報告 — 顏值審美大調查</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --primary: #ff6b6b;
+      --male: #5b8def;
+      --male-light: #e8f0fe;
+      --female: #ff6b9d;
+      --female-light: #ffe0e9;
+      --text: #1a1a2e;
+      --text-sec: #6c757d;
+      --border: #e8e8e8;
+      --shadow: 0 2px 16px rgba(0,0,0,0.08);
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 18px 60px;
+    }
+
+    /* Header */
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .page-header h1 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    .page-header h1 .hl { color: var(--primary); }
+    .page-header .meta {
+      font-size: 0.85rem;
+      color: var(--text-sec);
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .icon { font-size: 1.3rem; }
+
+    /* Key findings */
+    .findings {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .finding {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .finding .num {
+      background: var(--primary);
+      color: #fff;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .finding p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .finding strong { color: var(--primary); }
+
+    /* Stat grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .stat-card.wide { grid-column: 1 / -1; }
+    .stat-card .val {
+      font-size: 1.6rem;
+      font-weight: 900;
+    }
+    .stat-card .val.m { color: var(--male); }
+    .stat-card .val.f { color: var(--female); }
+    .stat-card .label {
+      font-size: 0.78rem;
+      color: var(--text-sec);
+      margin-top: 2px;
+    }
+
+    /* Prose */
+    .prose {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .prose p + p { margin-top: 12px; }
+    .prose .m { color: var(--male); font-weight: 700; }
+    .prose .f { color: var(--female); font-weight: 700; }
+
+    /* Photo cards */
+    .photo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .photo-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px 16px;
+      overflow: hidden;
+    }
+    .photo-item img {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .photo-item .info { flex: 1; min-width: 0; }
+    .photo-item .info .name {
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .photo-item .info .scores {
+      font-size: 0.82rem;
+      color: var(--text-sec);
+      margin-top: 2px;
+    }
+    .photo-item .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .badge.hot { background: #fff3e0; color: #e65100; }
+    .badge.cold { background: #e3f2fd; color: #1565c0; }
+    .badge.gap { background: #fce4ec; color: #c62828; }
+    .badge.same { background: #e8f5e9; color: #2e7d32; }
+
+    /* Versus row */
+    .vs-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .vs-row .vs-card {
+      flex: 1;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      text-align: center;
+    }
+    .vs-row .vs-card .score {
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+    .vs-row .vs-card .lbl {
+      font-size: 0.78rem;
+      color: var(--text-sec);
+    }
+    .vs-arrow {
+      display: flex;
+      align-items: center;
+      font-size: 1.2rem;
+      color: var(--text-sec);
+    }
+
+    /* Scale comparison */
+    .scale-item {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .scale-item .eq {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .scale-item .note {
+      font-size: 0.82rem;
+      color: var(--text-sec);
+      margin-top: 4px;
+    }
+
+    /* Accordion */
+    .accordion {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .accordion summary {
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .accordion summary::-webkit-details-marker { display: none; }
+    .accordion summary::after {
+      content: '▸';
+      transition: transform 0.2s;
+      color: var(--text-sec);
+    }
+    .accordion[open] summary::after { transform: rotate(90deg); }
+    .accordion .acc-body {
+      padding: 0 18px 16px;
+      font-size: 0.9rem;
+      line-height: 1.75;
+    }
+    .accordion .acc-body p + p { margin-top: 10px; }
+    .acc-body .sub-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+    .acc-body ul {
+      padding-left: 1.2em;
+      margin-bottom: 8px;
+    }
+    .acc-body li {
+      margin-bottom: 3px;
+      font-size: 0.88rem;
+    }
+
+    /* Conclusion */
+    .conclusion {
+      background: linear-gradient(135deg, #fff5f5, #ffe0e9);
+      border-radius: var(--radius);
+      padding: 22px 22px;
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+    .conclusion .big {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .conclusion .quote {
+      margin-top: 14px;
+      font-style: italic;
+      color: var(--text-sec);
+      font-size: 0.9rem;
+    }
+
+    /* Sub-section labels */
+    .sub-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      margin-bottom: 8px;
+      margin-top: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      .page { padding: 20px 14px 48px; }
+      .page-header h1 { font-size: 1.45rem; }
+      .stat-grid { gap: 8px; }
+      .stat-card .val { font-size: 1.3rem; }
+      .photo-item img { width: 48px; height: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1>📊 審美差異<span class="hl">分析報告</span></h1>
+      <p class="meta">資料來源：29 位有效受試者 ｜ 20 張 AI 生成照片</p>
+    </div>
+
+    <!-- 1. Quick Summary -->
+    <div class="section">
+      <div class="section-title"><span class="icon">💡</span> 快速重點</div>
+      <div class="findings">
+        <div class="finding">
+          <span class="num">1</span>
+          <p>男女審美的大方向<strong>其實很接近</strong>，覺得帥的跟不帥的，大致上是同一批人。</p>
+        </div>
+        <div class="finding">
+          <span class="num">2</span>
+          <p>但男生的平均分數比女生<strong>高了 0.6 分</strong>（男 4.99 vs 女 4.37），男生比較願意「給面子」。</p>
+        </div>
+        <div class="finding">
+          <span class="num">3</span>
+          <p>20 張照片裡，女生平均分比男生高的<strong>只有 3 張</strong>，其餘 17 張都是男生打更高。</p>
+        </div>
+        <div class="finding">
+          <span class="num">4</span>
+          <p><strong>08 號</strong>是唯一的「公認帥哥」——男女平均都超過 7 分。</p>
+        </div>
+        <div class="finding">
+          <span class="num">5</span>
+          <p>差異最大的是 <strong>12 號</strong>：男生給 5.1 分，女生只給 3.4 分，差了 1.6 分。</p>
+        </div>
+        <div class="finding">
+          <span class="num">6</span>
+          <p>女生之間的意見比男生<strong>更容易分裂</strong>——同一張照片，女生之間的分數差距通常更大。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Overall Stats -->
+    <div class="section">
+      <div class="section-title"><span class="icon">📋</span> 整體數據</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="val m">17</div>
+          <div class="label">👨 男生受試者</div>
+        </div>
+        <div class="stat-card">
+          <div class="val f">12</div>
+          <div class="label">👩 女生受試者</div>
+        </div>
+        <div class="stat-card">
+          <div class="val m">4.99</div>
+          <div class="label">👨 男生整體平均</div>
+        </div>
+        <div class="stat-card">
+          <div class="val f">4.37</div>
+          <div class="label">👩 女生整體平均</div>
+        </div>
+        <div class="stat-card">
+          <div class="val m">25.1%</div>
+          <div class="label">👨 7 分以上比例</div>
+        </div>
+        <div class="stat-card">
+          <div class="val f">17.5%</div>
+          <div class="label">👩 7 分以上比例</div>
+        </div>
+        <div class="stat-card">
+          <div class="val m" style="color: #90a4ae;">11.2%</div>
+          <div class="label">👨 1~2 分比例</div>
+        </div>
+        <div class="stat-card">
+          <div class="val f" style="color: #90a4ae;">21.7%</div>
+          <div class="label">👩 1~2 分比例</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Interpretation -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🔍</span> 審美差異解讀</div>
+      <div class="prose">
+        <p>雖然男生的平均分比女生高，但把 20 張照片排個名次的話，男女排出來的順序<strong>幾乎一樣</strong>（相關係數 0.92）。也就是說，男女對「誰比較帥、誰比較不帥」的判斷方向是很接近的。</p>
+        <p>差別在哪裡？差在<strong>給分的尺度</strong>。男生比較容易往上加分，女生給高分更保守。男生給了 <span class="m">25.1%</span> 的 7 分以上，女生只有 <span class="f">17.5%</span>。反過來，女生給 1~2 分的比例（<span class="f">21.7%</span>）是男生（<span class="m">11.2%</span>）的將近兩倍。</p>
+        <p>有趣的是，女生平均分比男生高的照片只有 3 張：<strong>09 號、10 號、16 號</strong>。其餘 17 張都是男生打得比女生高。</p>
+      </div>
+    </div>
+
+    <!-- 4. Consensus -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🔥</span> 公認帥哥 vs 公認不帥</div>
+
+      <p class="sub-label">🔥 公認帥哥（男女平均都 ≥ 7）</p>
+      <div class="photo-list">
+        <div class="photo-item">
+          <img src="/photos/08.png" alt="08">
+          <div class="info">
+            <div class="name">08 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">8.12</span> ｜ 👩 <span style="color:var(--female)">7.17</span></div>
+          </div>
+          <span class="badge hot">👑 唯一公認帥哥</span>
+        </div>
+      </div>
+
+      <details class="accordion" style="margin-top: 12px;">
+        <summary>放寬標準看看更多</summary>
+        <div class="acc-body">
+          <p class="sub-title">男女都 ≥ 6 的照片</p>
+          <div class="photo-list">
+            <div class="photo-item">
+              <img src="/photos/09.png" alt="09">
+              <div class="info">
+                <div class="name">09 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">6.18</span> ｜ 👩 <span style="color:var(--female)">6.42</span></div>
+              </div>
+            </div>
+            <div class="photo-item">
+              <img src="/photos/10.png" alt="10">
+              <div class="info">
+                <div class="name">10 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">6.41</span> ｜ 👩 <span style="color:var(--female)">6.50</span></div>
+              </div>
+            </div>
+          </div>
+
+          <p class="sub-title" style="margin-top:16px;">公認不帥（男女都 ≤ 3）</p>
+          <div class="photo-list">
+            <div class="photo-item">
+              <img src="/photos/05.png" alt="05">
+              <div class="info">
+                <div class="name">05 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">2.29</span> ｜ 👩 <span style="color:var(--female)">2.25</span></div>
+              </div>
+              <span class="badge cold">最低分</span>
+            </div>
+            <div class="photo-item">
+              <img src="/photos/07.png" alt="07">
+              <div class="info">
+                <div class="name">07 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">2.76</span> ｜ 👩 <span style="color:var(--female)">2.58</span></div>
+              </div>
+            </div>
+            <div class="photo-item">
+              <img src="/photos/11.png" alt="11">
+              <div class="info">
+                <div class="name">11 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">2.82</span> ｜ 👩 <span style="color:var(--female)">2.50</span></div>
+              </div>
+            </div>
+            <div class="photo-item">
+              <img src="/photos/14.png" alt="14">
+              <div class="info">
+                <div class="name">14 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">2.65</span> ｜ 👩 <span style="color:var(--female)">2.58</span></div>
+              </div>
+            </div>
+            <div class="photo-item">
+              <img src="/photos/18.png" alt="18">
+              <div class="info">
+                <div class="name">18 號</div>
+                <div class="scores">👨 <span style="color:var(--male)">2.41</span> ｜ 👩 <span style="color:var(--female)">2.33</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- 5. Most Controversial -->
+    <div class="section">
+      <div class="section-title"><span class="icon">💔</span> 差異最大的照片</div>
+      <div class="photo-list">
+        <div class="photo-item">
+          <img src="/photos/12.png" alt="12">
+          <div class="info">
+            <div class="name">12 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">5.06</span> ｜ 👩 <span style="color:var(--female)">3.42</span></div>
+          </div>
+          <span class="badge gap">差 1.64</span>
+        </div>
+        <div class="photo-item">
+          <img src="/photos/15.png" alt="15">
+          <div class="info">
+            <div class="name">15 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">6.47</span> ｜ 👩 <span style="color:var(--female)">4.92</span></div>
+          </div>
+          <span class="badge gap">差 1.55</span>
+        </div>
+        <div class="photo-item">
+          <img src="/photos/03.png" alt="03">
+          <div class="info">
+            <div class="name">03 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">4.18</span> ｜ 👩 <span style="color:var(--female)">2.75</span></div>
+          </div>
+          <span class="badge gap">差 1.43</span>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 20px;"><span class="icon">🤝</span> 差異最小的照片</div>
+      <div class="photo-list">
+        <div class="photo-item">
+          <img src="/photos/14.png" alt="14">
+          <div class="info">
+            <div class="name">14 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">2.65</span> ｜ 👩 <span style="color:var(--female)">2.58</span></div>
+          </div>
+          <span class="badge same">差 0.06</span>
+        </div>
+        <div class="photo-item">
+          <img src="/photos/10.png" alt="10">
+          <div class="info">
+            <div class="name">10 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">6.41</span> ｜ 👩 <span style="color:var(--female)">6.50</span></div>
+          </div>
+          <span class="badge same">差 0.09</span>
+        </div>
+        <div class="photo-item">
+          <img src="/photos/13.png" alt="13">
+          <div class="info">
+            <div class="name">13 號</div>
+            <div class="scores">👨 <span style="color:var(--male)">5.18</span> ｜ 👩 <span style="color:var(--female)">4.92</span></div>
+          </div>
+          <span class="badge same">差 0.26</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Score Standards -->
+    <div class="section">
+      <div class="section-title"><span class="icon">⚖️</span> 同一個分數，心裡的標準不一樣</div>
+      <div class="prose" style="margin-bottom: 12px;">
+        <p>男女對同一張臉的看法差不多，但「幾分算高」的門檻不一樣。簡單來說：</p>
+      </div>
+      <div class="scale-item">
+        <div class="eq">👨 男生的 <span style="color:var(--male)">7 分</span> ≈ 👩 女生的 <span style="color:var(--female)">6.5 分</span></div>
+        <div class="note">男生給 7 分的照片，女生大約只給到 6.5</div>
+      </div>
+      <div class="scale-item">
+        <div class="eq">👨 男生的 <span style="color:var(--male)">5 分</span> ≈ 👩 女生的 <span style="color:var(--female)">4.3 分</span></div>
+        <div class="note">中間分段差距最明顯</div>
+      </div>
+      <div class="scale-item">
+        <div class="eq">👩 女生的 <span style="color:var(--female)">7 分</span> ≈ 👨 男生的 <span style="color:var(--male)">7.6 分</span></div>
+        <div class="note">女生願意給 7 分的臉，男生通常會給得更高</div>
+      </div>
+    </div>
+
+    <!-- 7. Standard Deviation -->
+    <div class="section">
+      <div class="section-title"><span class="icon">📐</span> 誰的意見比較分裂？</div>
+      <div class="prose" style="margin-bottom: 12px;">
+        <p>女生之間的評分差異比男生大一些。同一張照片丟給女生，她們之間的意見分歧通常更明顯——有人覺得不錯、有人覺得不行。男生比較「一起覺得普通」或「一起覺得還行」。</p>
+      </div>
+
+      <details class="accordion">
+        <summary>看更多分析細節</summary>
+        <div class="acc-body">
+          <p><strong>什麼是標準差？</strong><br>
+          如果大家打的分數都差不多，標準差就小；如果有人給 2 分、有人給 8 分，標準差就大。<br>
+          標準差越大，代表意見越分裂。</p>
+
+          <p class="sub-title">整體標準差</p>
+          <ul>
+            <li>👨 男生：<strong>2.02</strong></li>
+            <li>👩 女生：<strong>2.11</strong></li>
+          </ul>
+          <p>女生整體分數比男生更分散，更容易出現兩極意見。</p>
+
+          <p class="sub-title">每張照片的平均標準差</p>
+          <ul>
+            <li>👨 男生：<strong>1.20</strong></li>
+            <li>👩 女生：<strong>1.41</strong></li>
+          </ul>
+          <p>同一張照片，女生之間的意見差距通常比男生大約 18%。</p>
+
+          <p class="sub-title">👨 男生最有共識的照片</p>
+          <ul>
+            <li>08 號（σ = 0.70）— 大家都覺得帥</li>
+            <li>18 號（σ = 0.94）— 大家都覺得不帥</li>
+            <li>06 號（σ = 1.03）</li>
+            <li>09 號（σ = 1.06）</li>
+          </ul>
+
+          <p class="sub-title">👨 男生最分裂的照片</p>
+          <ul>
+            <li>03 號（σ = 1.51）</li>
+            <li>13 號（σ = 1.47）</li>
+            <li>04 號（σ = 1.44）</li>
+            <li>16 號（σ = 1.41）</li>
+          </ul>
+
+          <p class="sub-title">👩 女生最有共識的照片</p>
+          <ul>
+            <li>06 號（σ = 1.03）</li>
+            <li>16 號（σ = 1.03）</li>
+            <li>10 號（σ = 1.09）</li>
+            <li>04 號（σ = 1.11）</li>
+          </ul>
+
+          <p class="sub-title">👩 女生最分裂的照片</p>
+          <ul>
+            <li>20 號（σ = 1.99）</li>
+            <li>01 號（σ = 1.98）</li>
+            <li>12 號（σ = 1.98）</li>
+            <li>17 號（σ = 1.73）</li>
+            <li>15 號（σ = 1.73）</li>
+          </ul>
+
+          <p class="sub-title">離散程度範圍</p>
+          <ul>
+            <li>👨 男生各照片 σ：0.70 ~ 1.51（中位數 1.19）</li>
+            <li>👩 女生各照片 σ：1.03 ~ 1.99（中位數 1.33）</li>
+          </ul>
+          <p>男生比較常落在「有一點差異但不太誇張」的範圍；女生比較容易出現「有人很喜歡、有人完全不行」的兩極反應。</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- 8. Conclusion -->
+    <div class="section">
+      <div class="section-title"><span class="icon">✨</span> 結論</div>
+      <div class="conclusion">
+        <p class="big">男女對「帥」的判斷方向很接近，<br>差的是給分的手感。</p>
+        <p>男生比女生更容易往上加分，女生之間對同一張臉的意見更容易分裂。<br>真正有趣的不是全部照片，而是那幾張特別能拉開差距的臉。</p>
+        <p class="quote">「男生不是不知道誰比較不帥，只是比女生更容易給面子。」</p>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
