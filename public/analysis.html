@@ -313,6 +313,42 @@
       margin-top: 4px;
     }
 
+    /* Gallery */
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .gallery-header .desc {
+      font-size: 0.82rem;
+      color: var(--text-sec);
+      margin-top: 6px;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .gallery-cell {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      padding: 10px 8px 8px;
+      text-align: center;
+    }
+    .gallery-cell img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }
+    .gallery-cell .gid {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      margin-top: 6px;
+    }
+
     /* Responsive */
     @media (max-width: 520px) {
       .page { padding: 20px 14px 48px; }
@@ -320,6 +356,8 @@
       .stat-grid { gap: 8px; }
       .stat-card .val { font-size: 1.3rem; }
       .photo-item img { width: 48px; height: 48px; }
+      .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .gallery-cell { padding: 8px 6px 6px; }
     }
   </style>
 </head>
@@ -649,6 +687,36 @@
         <p class="big">男女對「帥」的判斷方向很接近，<br>差的是給分的手感。</p>
         <p>男生比女生更容易往上加分，女生之間對同一張臉的意見更容易分裂。<br>真正有趣的不是全部照片，而是那幾張特別能拉開差距的臉。</p>
         <p class="quote">「男生不是不知道誰比較不帥，只是比女生更容易給面子。」</p>
+      </div>
+    </div>
+
+    <!-- 9. Photo Gallery -->
+    <div class="section" style="margin-top: 20px; padding-top: 24px; border-top: 1px solid var(--border);">
+      <div class="gallery-header">
+        <div class="section-title" style="justify-content: center;"><span class="icon">🖼️</span> 20 張照片總覽</div>
+        <p class="desc">前面一直在看 08、12、15 這些編號？這裡可以直接對照全部照片。</p>
+      </div>
+      <div class="gallery-grid">
+        <div class="gallery-cell"><img src="/photos/01.png" alt="01"><div class="gid">01</div></div>
+        <div class="gallery-cell"><img src="/photos/02.png" alt="02"><div class="gid">02</div></div>
+        <div class="gallery-cell"><img src="/photos/03.png" alt="03"><div class="gid">03</div></div>
+        <div class="gallery-cell"><img src="/photos/04.png" alt="04"><div class="gid">04</div></div>
+        <div class="gallery-cell"><img src="/photos/05.png" alt="05"><div class="gid">05</div></div>
+        <div class="gallery-cell"><img src="/photos/06.png" alt="06"><div class="gid">06</div></div>
+        <div class="gallery-cell"><img src="/photos/07.png" alt="07"><div class="gid">07</div></div>
+        <div class="gallery-cell"><img src="/photos/08.png" alt="08"><div class="gid">08</div></div>
+        <div class="gallery-cell"><img src="/photos/09.png" alt="09"><div class="gid">09</div></div>
+        <div class="gallery-cell"><img src="/photos/10.png" alt="10"><div class="gid">10</div></div>
+        <div class="gallery-cell"><img src="/photos/11.png" alt="11"><div class="gid">11</div></div>
+        <div class="gallery-cell"><img src="/photos/12.png" alt="12"><div class="gid">12</div></div>
+        <div class="gallery-cell"><img src="/photos/13.png" alt="13"><div class="gid">13</div></div>
+        <div class="gallery-cell"><img src="/photos/14.png" alt="14"><div class="gid">14</div></div>
+        <div class="gallery-cell"><img src="/photos/15.png" alt="15"><div class="gid">15</div></div>
+        <div class="gallery-cell"><img src="/photos/16.png" alt="16"><div class="gid">16</div></div>
+        <div class="gallery-cell"><img src="/photos/17.png" alt="17"><div class="gid">17</div></div>
+        <div class="gallery-cell"><img src="/photos/18.png" alt="18"><div class="gid">18</div></div>
+        <div class="gallery-cell"><img src="/photos/19.png" alt="19"><div class="gid">19</div></div>
+        <div class="gallery-cell"><img src="/photos/20.png" alt="20"><div class="gid">20</div></div>
       </div>
     </div>
 
