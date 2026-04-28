@@ -1,39 +1,124 @@
 const express = require('express');
+const compression = require('compression');
 const path = require('path');
 const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ===== Middleware =====
+app.use(compression());
 app.use(express.json({ limit: '1kb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 
-// ===== JSON File Database =====
+// ===== JSON File Database (In-Memory Cache) =====
 const DATA_FILE = path.join(__dirname, 'data.json');
 
-function loadData() {
-  try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch {
-    return { ratings: [] };
+let memoryData = { ratings: [] };
+let isDirty = false;
+
+// Load data into memory at startup
+try {
+  memoryData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  console.log(`Loaded ${memoryData.ratings.length} ratings into memory`);
+} catch {
+  memoryData = { ratings: [] };
+  fs.writeFileSync(DATA_FILE, JSON.stringify(memoryData));
+}
+
+// Flush dirty data to disk every 5 seconds
+const FLUSH_INTERVAL = 5000;
+const flushTimer = setInterval(() => {
+  if (isDirty) {
+    try {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(memoryData));
+      isDirty = false;
+    } catch (err) {
+      console.error('Failed to flush data:', err);
+    }
+  }
+}, FLUSH_INTERVAL);
+
+function flushSync() {
+  if (isDirty) {
+    try {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(memoryData));
+      isDirty = false;
+      console.log('Data flushed to disk');
+    } catch (err) {
+      console.error('Failed to flush data on shutdown:', err);
+    }
   }
 }
 
-function saveData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data));
-}
+// Graceful shutdown
+process.on('SIGTERM', () => { flushSync(); process.exit(0); });
+process.on('SIGINT', () => { flushSync(); process.exit(0); });
 
-if (!fs.existsSync(DATA_FILE)) saveData({ ratings: [] });
-
-// Helpers
+// ===== Cached Photo List =====
 const PHOTOS_DIR = path.join(__dirname, 'public', 'photos');
-
-function getValidPhotos() {
-  if (!fs.existsSync(PHOTOS_DIR)) return [];
-  return fs.readdirSync(PHOTOS_DIR)
+let cachedPhotos = [];
+try {
+  cachedPhotos = fs.readdirSync(PHOTOS_DIR)
     .filter(f => /\.(jpg|jpeg|png|webp|svg)$/i.test(f))
     .sort();
+  console.log(`Cached ${cachedPhotos.length} photos`);
+} catch {
+  cachedPhotos = [];
+}
+const photoSet = new Set(cachedPhotos);
+
+// ===== Results & Stats Cache (TTL-based) =====
+const CACHE_TTL = 3000; // 3 seconds
+let resultsCache = { data: null, ts: 0 };
+let statsCache = { data: null, ts: 0 };
+
+function invalidateResultsCache() {
+  resultsCache.ts = 0;
+  statsCache.ts = 0;
+}
+
+function getCompleteSessions(ratings) {
+  const sessionPhotos = {};
+  ratings.forEach(r => {
+    if (!sessionPhotos[r.sessionId]) sessionPhotos[r.sessionId] = new Set();
+    sessionPhotos[r.sessionId].add(r.photoId);
+  });
+  const complete = new Set();
+  for (const [sid, photos] of Object.entries(sessionPhotos)) {
+    if (photos.size >= 15) complete.add(sid);
+  }
+  return complete;
+}
+
+function computeResults() {
+  const complete = getCompleteSessions(memoryData.ratings);
+  const buckets = {};
+  const sessions = { M: new Set(), F: new Set() };
+
+  memoryData.ratings.forEach(r => {
+    if (!complete.has(r.sessionId)) return;
+    if (!buckets[r.photoId]) {
+      buckets[r.photoId] = { M: { total: 0, count: 0 }, F: { total: 0, count: 0 } };
+    }
+    const b = buckets[r.photoId][r.gender];
+    if (b) { b.total += r.score; b.count += 1; }
+    if (sessions[r.gender]) sessions[r.gender].add(r.sessionId);
+  });
+
+  const results = {};
+  for (const [photo, g] of Object.entries(buckets)) {
+    results[photo] = {
+      M: { avg: g.M.count ? +(g.M.total / g.M.count).toFixed(1) : 0, count: g.M.count },
+      F: { avg: g.F.count ? +(g.F.total / g.F.count).toFixed(1) : 0, count: g.F.count }
+    };
+  }
+
+  const stats = [];
+  if (sessions.M.size > 0) stats.push({ gender: 'M', users: sessions.M.size });
+  if (sessions.F.size > 0) stats.push({ gender: 'F', users: sessions.F.size });
+
+  return { results, stats };
 }
 
 function isValidSessionId(id) {
@@ -42,12 +127,12 @@ function isValidSessionId(id) {
 
 // ===== API Routes =====
 
-// Get list of photos
+// Get list of photos (cached, no disk read)
 app.get('/api/photos', (req, res) => {
-  res.json(getValidPhotos());
+  res.json(cachedPhotos);
 });
 
-// Submit a rating
+// Submit a rating (in-memory, no disk read/write per request)
 app.post('/api/rate', (req, res) => {
   const { photoId, gender, score, sessionId } = req.body;
 
@@ -64,90 +149,54 @@ app.post('/api/rate', (req, res) => {
     return res.status(400).json({ error: '無效的 session' });
   }
 
-  // Validate photoId exists
-  const validPhotos = getValidPhotos();
-  if (!validPhotos.includes(photoId)) {
+  if (!photoSet.has(photoId)) {
     return res.status(400).json({ error: '照片不存在' });
   }
 
-  const data = loadData();
-  const idx = data.ratings.findIndex(r => r.photoId === photoId && r.sessionId === sessionId);
+  const idx = memoryData.ratings.findIndex(r => r.photoId === photoId && r.sessionId === sessionId);
   const entry = { photoId, gender, score, sessionId, createdAt: new Date().toISOString() };
 
   if (idx >= 0) {
-    data.ratings[idx] = entry;
+    memoryData.ratings[idx] = entry;
   } else {
-    data.ratings.push(entry);
+    memoryData.ratings.push(entry);
   }
 
-  saveData(data);
+  isDirty = true;
+  invalidateResultsCache();
   res.json({ success: true });
 });
 
-// Only count sessions that rated all photos
-function getCompleteSessions(ratings) {
-  const sessionPhotos = {};
-  ratings.forEach(r => {
-    if (!sessionPhotos[r.sessionId]) sessionPhotos[r.sessionId] = new Set();
-    sessionPhotos[r.sessionId].add(r.photoId);
-  });
-  const complete = new Set();
-  for (const [sid, photos] of Object.entries(sessionPhotos)) {
-    if (photos.size >= 15) complete.add(sid);
-  }
-  return complete;
-}
-
-// Get aggregated results
+// Get aggregated results (cached)
 app.get('/api/results', (req, res) => {
-  const data = loadData();
-  const complete = getCompleteSessions(data.ratings);
-  const buckets = {};
-
-  data.ratings.forEach(r => {
-    if (!complete.has(r.sessionId)) return;
-    if (!buckets[r.photoId]) {
-      buckets[r.photoId] = { M: { total: 0, count: 0 }, F: { total: 0, count: 0 } };
-    }
-    const b = buckets[r.photoId][r.gender];
-    if (b) { b.total += r.score; b.count += 1; }
-  });
-
-  const results = {};
-  for (const [photo, g] of Object.entries(buckets)) {
-    results[photo] = {
-      M: { avg: g.M.count ? +(g.M.total / g.M.count).toFixed(1) : 0, count: g.M.count },
-      F: { avg: g.F.count ? +(g.F.total / g.F.count).toFixed(1) : 0, count: g.F.count }
-    };
+  const now = Date.now();
+  if (!resultsCache.data || now - resultsCache.ts > CACHE_TTL) {
+    const computed = computeResults();
+    resultsCache = { data: computed.results, ts: now };
+    statsCache = { data: computed.stats, ts: now };
   }
-  res.json(results);
+  res.json(resultsCache.data);
 });
 
-// Get participation stats (only complete sessions)
+// Get participation stats (cached, computed together with results)
 app.get('/api/stats', (req, res) => {
-  const data = loadData();
-  const complete = getCompleteSessions(data.ratings);
-  const sessions = { M: new Set(), F: new Set() };
-
-  data.ratings.forEach(r => {
-    if (!complete.has(r.sessionId)) return;
-    if (sessions[r.gender]) sessions[r.gender].add(r.sessionId);
-  });
-
-  const stats = [];
-  if (sessions.M.size > 0) stats.push({ gender: 'M', users: sessions.M.size });
-  if (sessions.F.size > 0) stats.push({ gender: 'F', users: sessions.F.size });
-  res.json(stats);
+  const now = Date.now();
+  if (!statsCache.data || now - statsCache.ts > CACHE_TTL) {
+    const computed = computeResults();
+    resultsCache = { data: computed.results, ts: now };
+    statsCache = { data: computed.stats, ts: now };
+  }
+  res.json(statsCache.data);
 });
 
-// Export full data.json for backup
+// Export full data.json for backup (from memory)
 app.get('/api/export', (req, res) => {
-  const data = loadData();
   res.setHeader('Content-Disposition', 'attachment; filename="data.json"');
-  res.json(data);
+  res.json(memoryData);
 });
 
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 顏值審美大調查 running at http://localhost:${PORT}`);
+  console.log(`   ${memoryData.ratings.length} ratings in memory | ${cachedPhotos.length} photos cached`);
 });

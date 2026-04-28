@@ -10,6 +10,7 @@
     "import:faces": "node import-downloaded-faces.js"
   },
   "dependencies": {
+    "compression": "^1.8.1",
     "express": "^4.21.0"
   }
 }
